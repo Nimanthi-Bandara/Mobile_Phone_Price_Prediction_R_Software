@@ -1,0 +1,172 @@
+---
+title: "RAM"
+author: "dinali"
+date: "2024-08-04"
+output: word_document
+---
+```{r}
+# Install and load necessary libraries
+install.packages("tidyverse")
+install.packages("car")      # For diagnostic plots and VIF
+install.packages("glmnet")   # For regularization
+library(tidyverse)
+library(car)
+library(glmnet)
+library(Metrics)
+
+# Load the dataset
+data <- read.csv("C:\\Users\\dinal\\Downloads\\Mobile_Phone_Dataset (2)\\Mobile_Phone_Dataset\\Group_Project\\Mobile.csv")
+
+# View the first few rows of the dataset
+head(data)
+
+# 1. Descriptive Analysis
+cat("Descriptive Analysis\n")
+summary(data)
+
+
+
+# 2. Univariate Analysis
+
+# Histogram for Price
+hist(data$Price, main="Histogram of Price", xlab="Price", col="lightblue", breaks=30)
+cat("\nUnivariate Analysis\n")
+
+# 1. Linear Regression
+linear_model <- lm(Price ~ Ratings, data=data)
+summary(linear_model)
+
+
+# Scatter Plot with Linear Regression
+plot(data$RAM, data$Price, main="Price vs RAM", xlab="Ratings", ylab="Price", col="blue")
+linear_model <- lm(Price ~ RAM, data=data)
+abline(linear_model, col="red")
+
+# Boxplot for RAM
+boxplot(data$RAM, main="Boxplot of RAM", ylab="Ratings", col="lightgreen")
+
+# 3. Multiple Linear Regression Analysis
+cat("\nMultiple Linear Regression Analysis\n")
+multiple_linear_model <- lm(Price ~ Ratings + RAM + ROM + Mobile_Size + Primary_Cam + Selfi_Cam + Battery_Power, data=data)
+summary(multiple_linear_model)
+
+# Diagnostic Plots for Multiple Linear Regression
+par(mfrow=c(2, 2))
+plot(multiple_linear_model)
+
+# Residual Analysis
+cat("\nResidual Analysis\n")
+# Residuals vs Fitted
+plot(multiple_linear_model$fitted.values, residuals(multiple_linear_model),
+     main="Residuals vs Fitted", xlab="Fitted values", ylab="Residuals", col="blue")
+abline(h=0, col="red")
+
+# Q-Q Plot
+qqPlot(multiple_linear_model, main="Q-Q Plot")
+
+# Cook's Distance
+cooks.distance <- cooks.distance(multiple_linear_model)
+plot(cooks.distance, type="h", main="Cook's Distance", ylab="Cook's Distance")
+
+# 4. Variable Selection
+
+# variable selection helps in building more efficient and effective models by focusing on the most relevant features, thereby improving prediction accuracy and computational efficiency.
+
+cat("\nVariable Selection\n")
+# Stepwise Selection
+stepwise_model <- step(multiple_linear_model, direction="both")
+summary(stepwise_model)
+
+# Residual Analysis for Selected Model
+cat("\nResidual Analysis for Selected Model\n")
+par(mfrow=c(2, 2))
+plot(stepwise_model)
+
+# 5. Better Predictive Model with Higher Accuracy
+# Prepare data for regularization
+x <- model.matrix(Price ~ Ratings + RAM + ROM + Mobile_Size + Primary_Cam + Selfi_Cam + Battery_Power, data=data)[,-1]
+y <- data$Price
+
+# Split the data into training and testing sets
+#Divides the data into training (70%) and testing (30%) sets. This separation allows to train the models on one subset of data and evaluate their performance on another, which helps assess their generalization capability.
+set.seed(123)  # For reproducibility
+train_indices <- sample(1:nrow(data), 0.7 * nrow(data))  # 70% training data
+x_train <- x[train_indices, ]
+y_train <- y[train_indices]
+x_test <- x[-train_indices, ]
+y_test <- y[-train_indices]
+
+# Lasso Regression (L1 Regularization)
+# Fits a Lasso regression model to the training data. Lasso (L1 regularization) helps with feature selection by shrinking some coefficients to zero, effectively selecting a subset of predictors.
+lasso_model <- glmnet(x_train, y_train, alpha=1)
+cv_lasso <- cv.glmnet(x_train, y_train, alpha=1)
+best_lambda_lasso <- cv_lasso$lambda.min
+cat("Best lambda for Lasso:", best_lambda_lasso, "\n")
+
+# Predict on the test set using the Lasso model
+lasso_predictions <- predict(lasso_model, s=best_lambda_lasso, newx=x_test)
+lasso_rmse <- rmse(y_test, lasso_predictions)
+cat("Lasso RMSE:", lasso_rmse, "\n")
+
+# # Predicts prices on the test set using the best lambda and calculates the Root Mean Squared Error (RMSE) to evaluate the model’s performance. RMSE is a measure of the model's prediction accuracy, with lower values indicating better performance.
+
+# Ridge Regression (L2 Regularization)
+# Fits a Ridge regression model to the training data. Ridge (L2 regularization) penalizes the size of coefficients but does not perform feature selection like Lasso.
+ridge_model <- glmnet(x_train, y_train, alpha=0)
+cv_ridge <- cv.glmnet(x_train, y_train, alpha=0)
+best_lambda_ridge <- cv_ridge$lambda.min
+cat("Best lambda for Ridge:", best_lambda_ridge, "\n")
+
+# Predict on the test set using the Ridge model
+ridge_predictions <- predict(ridge_model, s=best_lambda_ridge, newx=x_test)
+ridge_rmse <- rmse(y_test, ridge_predictions)
+cat("Ridge RMSE:", ridge_rmse, "\n")
+
+# Compare RMSE of both models
+# Compares the RMSE of Lasso and Ridge regression models to determine which model has better predictive accuracy. The model with the lower RMSE is considered to have better performance
+if (lasso_rmse < ridge_rmse) {
+    cat("Lasso Regression has better predictive accuracy with lower RMSE.\n")
+} else {
+    cat("Ridge Regression has better predictive accuracy with lower RMSE.\n")
+}
+
+# Lasso RMSE: 14353.36 > Ridge RMSE: 14230.76 
+# Therefore The model with the lower RMSE, ridge_model have better performance
+# ridge_model seems to be the Predictive Model with Higher Accuracy
+
+
+################## NO NEED ########################################################################
+
+# 5. Better Predictive Model with Higher Accuracy
+cat("\nBetter Predictive Model\n")
+
+# Prepare data for regularization
+x <- model.matrix(Price ~ Ratings + RAM + ROM + Mobile_Size + Primary_Cam + Selfi_Cam + Battery_Power, data=data)[,-1]
+y <- data$Price
+
+# Lasso Regression (L1 Regularization)
+lasso_model <- glmnet(x, y, alpha=1)
+plot(lasso_model, main="Lasso Regression Paths")
+
+# Cross-Validation for Lambda Selection
+cv_lasso <- cv.glmnet(x, y, alpha=1)
+best_lambda <- cv_lasso$lambda.min
+cat("Best lambda for Lasso:", best_lambda, "\n")
+
+# Fit the final Lasso Model
+final_lasso_model <- glmnet(x, y, alpha=1, lambda=best_lambda)
+print(coef(final_lasso_model))
+
+# Optional: Compare with other models
+# Ridge Regression (L2 Regularization)
+ridge_model <- glmnet(x, y, alpha=0)
+cv_ridge <- cv.glmnet(x, y, alpha=0)
+best_lambda_ridge <- cv_ridge$lambda.min
+cat("Best lambda for Ridge:", best_lambda_ridge, "\n")
+
+# Fit the final Ridge Model
+final_ridge_model <- glmnet(x, y, alpha=0, lambda=best_lambda_ridge)
+print(coef(final_ridge_model))
+####################################################################################################################
+```
+

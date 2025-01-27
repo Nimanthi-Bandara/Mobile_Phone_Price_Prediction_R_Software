@@ -1,0 +1,52 @@
+---
+title: "Battery Power"
+author: "PS/2020/093-Tharindu Senevirathne"
+date: "2024-08-03"
+output: word_document
+---
+
+```{r}
+# Install and load necessary libraries
+#install.packages("tidyverse")
+library(tidyverse)
+
+# Load the data set
+# Assuming the data set is in a CSV file named "mobile_phone_price_prediction.csv"
+data <- read.csv("C:/Users/Clone/Desktop/stat project/Mobile.csv")
+
+# View the first few rows of the dataset
+head(data)
+
+#Descriptive Analysis
+summary(data)
+#install.packages("ggplot2")
+
+library(ggplot2)
+
+
+# 1. Linear Regression
+linear_model <- lm(Price ~ Battery_Power, data=data)
+summary(linear_model)
+
+#Scatter_Plot
+plot(data$Battery_Power, data$Price, main="Linear Regression: Price vs Battery Power",xlab="Battery Power", ylab="Price", col="blue")
+abline(linear_model, col="red")
+
+
+# 2. Non-Linear Regression
+poly_model <- lm(Price ~ poly(Battery_Power, 2), data=data)
+summary(poly_model)
+plot(data$Battery_Power, data$Price, main="Non Linear Regression: Price vs Battery Power",
+     xlab="Battery_Power", ylab="Price", pch=19, col="blue")
+Battery_Power_seq <- seq(min(data$Battery_Power), max(data$Battery_Power), length.out=100)
+predicted_price <- predict(poly_model, newdata=data.frame(Battery_Power=Battery_Power_seq))
+lines(Battery_Power_seq, predicted_price, col="red")
+
+
+# 3. Multiple Linear Regression
+multiple_linear_model <- lm(Price ~ Battery_Power + RAM + ROM + Mobile_Size + Primary_Cam + Selfi_Cam + Ratings, data=data)
+summary(multiple_linear_model)
+par(mfrow=c(2, 2))
+plot(multiple_linear_model)
+```
+

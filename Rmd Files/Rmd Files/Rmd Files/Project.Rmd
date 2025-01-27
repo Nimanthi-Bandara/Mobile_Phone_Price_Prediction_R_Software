@@ -1,0 +1,60 @@
+---
+title: "Project"
+author: "Nimanthi Bandara"
+date: "2024-08-04"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r}
+df <-read.csv("C:\\Users\\NIMANTHI\\Desktop\\1_Sem-3_Y\\STAT_Lab-Statistical_Modeling\\Mobile_Phone_Dataset\\Group_Project\\Mobile.csv")
+head(df)
+
+#install.packages("tidyverse")
+library(tidyverse)
+
+#Descriptive Analysis
+summary(df)
+
+#install.packages("ggplot2")
+library(ggplot2)
+
+#Linear Regression
+Linear_Model <- lm(Price ~ ROM, data = df)
+summary(Linear_Model)
+
+#Scatter Plot
+plot(df$ROM,df$Price,main = "Linear Regression Between Price & ROM",xlab = "ROM",ylab = "Price",col="blue")
+abline(Linear_Model, col="red")
+
+#Interpretation
+#This scatter plot shows that the relationship between Prices of the mobile phone(y-axis) and ROM of the mobile phone(x-axis). Each point represent an individual mobile phone's ROM & it's corresponding price. Additionally, the red line represent the linear regression line fitted to the data & we can see it shows a positive linear relationship between Prices & ROM.
+
+#So, we can say that when the ROM size increasing, Price of the phone also increasing.
+
+
+# Non-Linear Regression
+polyn_Model<- lm(Price~poly(ROM,2),data = df)
+summary(polyn_Model)
+
+plot(df$ROM,df$Price, main = "Non-Linear Regression between Price & ROM", xlab = "ROM", ylab = "Price",pch= 19, col="blue")
+ROM_seq <- seq(min(df$ROM), max(df$ROM), length.out = 100)
+Predicted_Price <- predict(polyn_Model, newdata = data.frame(ROM = ROM_seq))
+lines(ROM_seq, Predicted_Price, col = "red")
+
+#Interpretation
+#This scatter plot demonstrate a non linear relationship between ROM size & Price. Larger storage capacities have an added value, therefore at first, the price increases along with the ROM size. Nevertheless, the price reaches a plataeu and stabalized after a certain amount, suggesting that additional ROM size increases have little effort on the price. 
+
+
+# Multiple-Linear Regression
+multi_Model <- lm(Price ~ Ratings + RAM + ROM + Mobile_Size + Primary_Cam + Selfi_Cam + Battery_Power, data = df)
+summary(multi_Model)
+
+
+par(mfrow=c(2,2))
+plot(multi_Model)
+
+
+```
+

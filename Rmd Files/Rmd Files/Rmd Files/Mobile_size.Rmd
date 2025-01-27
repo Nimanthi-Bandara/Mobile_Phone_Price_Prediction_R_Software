@@ -1,0 +1,69 @@
+---
+title: "Group project - group 12"
+author: "Upeksha Karunaratne"
+date: "2024-08-05"
+output: html_document
+---
+
+```{r}
+# Install and load necessary libraries
+#install.packages("tidyverse")
+#install.packages("car")      # For diagnostic plots and VIF
+#install.packages("glmnet")   # For regularization
+library(tidyverse)
+library(car)
+library(glmnet)
+
+# Load the dataset
+data <- read.csv("C:\\Users\\User\\Documents\\Sem 5\\Stat_lab\\Project\\Mobile.csv")
+
+# View the first few rows of the dataset
+head(data)
+
+# 1. Descriptive Analysis
+cat("Descriptive Analysis\n")
+summary(data)
+
+
+# 2. Univariate Analysis
+
+# Histogram for Price
+hist(data$Price, main="Histogram of Price", xlab="Price", col="lightblue", breaks=30)
+cat("\nUnivariate Analysis\n")
+
+# 1. Linear Regression
+linear_model <- lm(Price ~ Mobile_Size, data=data)
+summary(linear_model)
+
+
+# Scatter Plot with Linear Regression
+plot(data$Mobile_Size, data$Price, main="Price vs Mobile size", xlab="Mobile_Size", ylab="Price", col="blue")
+linear_model <- lm(Price ~ Mobile_Size, data=data)
+abline(linear_model, col="red")
+
+# Boxplot for Mobile size
+boxplot(data$Mobile_Size, main="Boxplot of Mobile size", ylab="Mobile_Size", col="lightgreen")
+
+# 3. Multiple Linear Regression Analysis
+cat("\nMultiple Linear Regression Analysis\n")
+multiple_linear_model <- lm(Price ~ Ratings + RAM + ROM + Mobile_Size + Primary_Cam + Selfi_Cam + Battery_Power, data=data)
+summary(multiple_linear_model)
+
+# Diagnostic Plots for Multiple Linear Regression
+par(mfrow=c(2, 2))
+plot(multiple_linear_model)
+
+# Residual Analysis
+cat("\nResidual Analysis\n")
+# Residuals vs Fitted
+plot(multiple_linear_model$fitted.values, residuals(multiple_linear_model),
+     main="Residuals vs Fitted", xlab="Fitted values", ylab="Residuals", col="blue")
+abline(h=0, col="red")
+
+# Q-Q Plot
+qqPlot(multiple_linear_model, main="Q-Q Plot")
+
+
+
+```
+

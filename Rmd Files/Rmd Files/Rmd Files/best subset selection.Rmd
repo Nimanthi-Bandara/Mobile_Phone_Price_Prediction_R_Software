@@ -1,0 +1,58 @@
+---
+title: "best subset selection"
+author: "dd"
+date: "2024-10-20"
+output: word_document
+---
+
+```{r}
+
+install.packages("leaps")
+library(leaps)
+
+# Perform best subset selection using regsubsets()
+best_subset <- regsubsets(Price ~ ., data = df, nbest = 1, nvmax = NULL, method = "forward")
+
+# View the best models for each subset size
+summary(best_subset)
+
+# Get a summary of the model selection
+subset_summary <- summary(best_subset)
+
+# Plotting RSS, R-squared, BIC against the number of predictors
+
+# Set up a plotting layout to show multiple plots
+par(mfrow = c(2, 2))  # 2x2 layout for multiple plots
+
+# Plot RSS (Residual Sum of Squares) against the number of predictors
+plot(subset_summary$rss, type = "b", xlab = "Number of Variables", ylab = "RSS", 
+     main = "Residual Sum of Squares (RSS)", pch = 19, col = "blue")
+# Mark the minimum RSS with points and abline
+points(which.min(subset_summary$rss), min(subset_summary$rss), col = "red", pch = 19)
+abline(v = which.min(subset_summary$rss), col = "red", lty = 2)
+
+# Plot Adjusted R-squared against the number of predictors
+plot(subset_summary$adjr2, type = "b", xlab = "Number of Variables", ylab = "Adjusted R²",
+     main = "Adjusted R²", pch = 19, col = "green")
+# Mark the maximum Adjusted R² with points and abline
+points(which.max(subset_summary$adjr2), max(subset_summary$adjr2), col = "red", pch = 19)
+abline(v = which.max(subset_summary$adjr2), col = "red", lty = 2)
+
+# Plot Cp (Mallows' Cp) against the number of predictors
+plot(subset_summary$cp, type = "b", xlab = "Number of Variables", ylab = "Mallows' Cp",
+     main = "Mallows' Cp", pch = 19, col = "purple")
+# Mark the minimum Cp with points and abline
+points(which.min(subset_summary$cp), min(subset_summary$cp), col = "red", pch = 19)
+abline(v = which.min(subset_summary$cp), col = "red", lty = 2)
+
+# Plot BIC against the number of predictors
+plot(subset_summary$bic, type = "b", xlab = "Number of Variables", ylab = "BIC",
+     main = "Bayesian Information Criterion (BIC)", pch = 19, col = "orange")
+# Mark the minimum BIC with points and abline
+points(which.min(subset_summary$bic), min(subset_summary$bic), col = "red", pch = 19)
+abline(v = which.min(subset_summary$bic), col = "red", lty = 2)
+
+
+
+```
+

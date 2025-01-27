@@ -1,0 +1,57 @@
+---
+title: "Group Project - Group 12"
+author: "Didula Heshan"
+date: "2024-07-27"
+output: word_document
+---
+
+```{r }
+# Install and load necessary libraries
+install.packages("tidyverse")
+library(tidyverse)
+
+# Load the data set
+# Assuming the data set is in a CSV file named "mobile_phone_price_prediction.csv"
+data <- read.csv("C:\\Users\\iamdi\\Downloads\\Group_Project\\Mobile.csv")
+
+# View the first few rows of the dataset
+head(data)
+
+#Descriptive Analysis
+summary(data)
+```
+
+
+```{r }
+
+library(ggplot2)
+
+
+# 1. Linear Regression
+linear_model <- lm(Price ~ Ratings, data=data)
+summary(linear_model)
+
+#Scatter_Plot
+plot(data$Ratings, data$Price, main="Linear Regression: Price vs Ratings",xlab="Ratings", ylab="Price", col="blue")
+abline(linear_model, col="red")
+
+# 2. Polynomial Regression (quadratic)
+poly_model <- lm(Price ~ poly(Ratings, 2), data=data)
+summary(poly_model)
+plot(data$Ratings, data$Price, main="Polynomial Regression: Price vs Ratings",
+     xlab="Ratings", ylab="Price", pch=19, col="blue")
+ratings_seq <- seq(min(data$Ratings), max(data$Ratings), length.out=100)
+predicted_price <- predict(poly_model, newdata=data.frame(Ratings=ratings_seq))
+lines(ratings_seq, predicted_price, col="red")
+
+# 3. Multiple Linear Regression
+multiple_linear_model <- lm(Price ~ Ratings + RAM + ROM + Mobile_Size + Primary_Cam + Selfi_Cam + Battery_Power, data=data)
+summary(multiple_linear_model)
+par(mfrow=c(2, 2))
+plot(multiple_linear_model)
+
+
+
+```
+```
+
